@@ -27,6 +27,7 @@ export class NoteController {
     try {
       const userId = req.user!.userId;
       const search = req.query.search as string | undefined;
+      console.log("hello")
 
       const notes = await noteService.getUserNotes(userId, search);
 

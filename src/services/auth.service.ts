@@ -28,7 +28,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(
       data.password,
-     10
+      10
     );
 
     const user = await User.create({
@@ -40,7 +40,6 @@ export class AuthService {
       id: user.id,
       name: user.name,
       email: user.email,
-      
     };
   }
 
@@ -75,7 +74,7 @@ export class AuthService {
 
     const refreshToken = generateRefreshToken({
       userId: user.id,
-      email:user.email
+      email: user.email,
     });
 
     return {
@@ -83,39 +82,55 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-       
       },
       accessToken,
       refreshToken,
     };
   }
+
+  async getMe(userId: string) {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.NOT_FOUND,
+        MESSAGES.USER_MESSAGES.USER_NOT_FOUND
+      );
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
+  }
+
   async refresh(refreshToken: string) {
-  if (!refreshToken) {
-    throw new AppError(
-      HTTP_STATUS.UNAUTHORIZED,
-      MESSAGES.AUTH_MESSAGES.UNAUTHORIZED
-    );
+    if (!refreshToken) {
+      throw new AppError(
+        HTTP_STATUS.UNAUTHORIZED,
+        MESSAGES.AUTH_MESSAGES.UNAUTHORIZED
+      );
+    }
+
+    const payload = verifyRefreshToken(refreshToken) as JwtPayload;
+
+    const user = await User.findById(payload.userId);
+
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.UNAUTHORIZED,
+        MESSAGES.AUTH_MESSAGES.UNAUTHORIZED
+      );
+    }
+
+    const accessToken = generateAccessToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return accessToken;
   }
-
-  const payload = verifyRefreshToken(refreshToken) as JwtPayload;
-
-  const user = await User.findById(payload.userId);
-
-  if (!user) {
-    throw new AppError(
-      HTTP_STATUS.UNAUTHORIZED,
-      MESSAGES.AUTH_MESSAGES.UNAUTHORIZED
-    );
-  }
-
-  const accessToken = generateAccessToken({
-    userId: user.id,
-    email: user.email,
-  });
-
-  return accessToken;
-}
-
 }
 
 export const authService = new AuthService();

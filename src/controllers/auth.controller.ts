@@ -8,9 +8,6 @@ import { TokenType } from "../constants/token-enum";
 import { COOKIE_OPTIONS } from "../constants/cookie.options";
 import { env } from "../config/env";
 
-
-
-
 export class AuthController {
   async register(
     req: Request,
@@ -50,47 +47,67 @@ export class AuthController {
       next(error);
     }
   }
+
+  async getMe(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user!.userId;
+      const user = await authService.getMe(userId);
+
+      return sendResponse(res, {
+        statusCode: HTTP_STATUS.OK,
+        message: "User session verified successfully",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async refresh(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const refreshToken = req.cookies[TokenType.REFRESH];
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const refreshToken = req.cookies[TokenType.REFRESH];
 
-    const accessToken =
-      await authService.refresh(refreshToken);
+      const accessToken =
+        await authService.refresh(refreshToken);
 
-    res.cookie(TokenType.ACCESS, accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: Number(env.ACCESS_TOKEN_MAX_AGE),
-    });
+      res.cookie(TokenType.ACCESS, accessToken, {
+        ...COOKIE_OPTIONS,
+        maxAge: Number(env.ACCESS_TOKEN_MAX_AGE),
+      });
 
-    return sendResponse(res, {
-      statusCode: HTTP_STATUS.OK,
-      message: MESSAGES.AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED,
-    });
-  } catch (error) {
-    next(error);
+      return sendResponse(res, {
+        statusCode: HTTP_STATUS.OK,
+        message: MESSAGES.AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-}
-async logout(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    clearAuthCookies(res);
 
-    return sendResponse(res, {
-      statusCode: HTTP_STATUS.OK,
-      message: MESSAGES.AUTH_MESSAGES.LOGOUT_SUCCESS,
-    });
-  } catch (error) {
-    next(error);
+  async logout(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      clearAuthCookies(res);
+
+      return sendResponse(res, {
+        statusCode: HTTP_STATUS.OK,
+        message: MESSAGES.AUTH_MESSAGES.LOGOUT_SUCCESS,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-}
-
 }
 
 export const authController = new AuthController();

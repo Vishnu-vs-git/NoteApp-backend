@@ -5,8 +5,8 @@ export const registerSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(3, VALIDATION_MESSAGES.NAME.MIN)
-    .max(50, VALIDATION_MESSAGES.NAME.MAX)
+    .min(1, VALIDATION_MESSAGES.NAME.REQUIRED)
+    .max(15, VALIDATION_MESSAGES.NAME.MAX)
     .regex(
       /^[A-Z][a-zA-Z]*(?: [A-Za-z]+)*$/,
       VALIDATION_MESSAGES.NAME.INVALID
@@ -19,13 +19,12 @@ export const registerSchema = z.object({
 
   password: z
     .string()
-    .min(8, VALIDATION_MESSAGES.PASSWORD.MIN)
+    .min(6, VALIDATION_MESSAGES.PASSWORD.MIN)
     .max(16, VALIDATION_MESSAGES.PASSWORD.MAX)
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,16}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{6,16}$/,
       VALIDATION_MESSAGES.PASSWORD.INVALID
     ),
-
 });
 
 export const loginSchema = z.object({
